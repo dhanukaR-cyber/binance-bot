@@ -1,0 +1,4 @@
+telethon
+python-binance
+pillow
+pytesseract
