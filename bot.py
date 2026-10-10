@@ -9,16 +9,10 @@ import pytesseract
 from telethon import TelegramClient, events
 from binance.client import Client
 
-# Termux/Cloud Tesseract Path Handler (Render/Cloud වලදී Error නොවීමට සකසා ඇත)
-try:
-    termux_tesseract = '/data/data/com.termux/files/usr/bin/tesseract'
-    if os.path.exists(termux_tesseract):
-        pytesseract.pytesseract.tesseract_cmd = termux_tesseract
-    else:
-        # Cloud සර්වර් සඳහා Default path එක බැලීම
-        pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
-except Exception:
-    pass
+# Termux Tesseract Path
+termux_tesseract = '/data/data/com.termux/files/usr/bin/tesseract'
+if os.path.exists(termux_tesseract):
+    pytesseract.pytesseract.tesseract_cmd = termux_tesseract
 
 # 1. TELEGRAM API DETAILS
 API_ID = 30864992
@@ -28,8 +22,8 @@ API_HASH = 'e7f7f96e78dbe7ae1c705adc7ebe43f1'
 BINANCE_API_KEY = 'xRteorAHsUkMMruIckEW2EN0SsUIQyMfp3fU8wgdggTtkx9LjDsW8WhlrhoxPXn1'
 BINANCE_API_SECRET = 'YKMXR9yNOzeZkNpranCjjUCXtnUDkpOB0bmsOpMdMGFlOcp0DG93a4eC9T0Nta9u'
 
-# 3. INITIALIZE CLIENTS (Cloud එකේ Lock නොවීමට Render session නම පාවිච්චි කරයි)
-telegram_client = TelegramClient('render_bot_session', API_ID, API_HASH)
+# 3. INITIALIZE CLIENTS
+telegram_client = TelegramClient('user_session', API_ID, API_HASH)
 binance_client = Client(BINANCE_API_KEY, BINANCE_API_SECRET)
 
 async def send_telegram_msg(message, file_path=None):
@@ -304,7 +298,7 @@ async def main(event):
                 entry = float(p['entryPrice'])
                 pnl = float(p['unRealizedProfit'])
                 lev = p['leverage']
-                msg += f"• #{sym} | {side} | {lev}x | Entry: ${entry} \vert{} PnL:${pnl:.2f}\n"
+                msg += f"• #{sym} | {side} | {lev}x | Entry: ${entry} | PnL:${pnl:.2f}\n"
 
             msg += f"\n⏳ **Total Open Orders (TP/SL/Limits):** {len(open_orders)}"
             await send_telegram_msg(msg)
@@ -479,7 +473,6 @@ async def main(event):
                 else:
                     entry_price = current_market_price
 
-                # Wallet balance එකෙන් 5%ක් (අවශ්‍ය නම් 0.10 මඟින් 10% කළ හැක)
                 margin_to_use = available_balance * 0.05
                 position_val = margin_to_use * leverage
 
